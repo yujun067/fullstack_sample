@@ -410,69 +410,7 @@ docker exec -it redis redis-cli ping
 docker exec -it redis redis redis-cli publish "feature-flag-updates" '{"test": "message"}'
 ```
 
-## 📈 Monitoring
 
-### Application Metrics
-
-- **Health Endpoints**: `/actuator/health`
-- **Metrics**: `/actuator/metrics`
-- **Info**: `/actuator/info`
-
-### Real-time Monitoring
-
-```bash
-# Monitor Redis pub/sub messages
-docker-compose logs -f movie-search-backend | grep "PUB/SUB"
-
-# Monitor feature flag updates
-docker-compose logs -f feature-flag-backend | grep "UPDATED"
-
-# Monitor movie search requests
-docker-compose logs -f movie-search-backend | grep "Movie search"
-```
-
-### Logging
-
-- **Backend Logs**: Application logs with structured format
-- **Frontend Logs**: Browser console and network logs
-- **Docker Logs**: `docker-compose logs <service>`
-- **Redis Pub/Sub**: Real-time message monitoring
-
-## 🔒 Security
-
-### Security Features
-
-- **Input Validation**: Comprehensive request validation
-- **CORS Configuration**: Cross-origin request handling
-- **Error Handling**: Secure error responses
-- **Docker Security**: Non-root user containers
-- **Environment Variables**: Secure configuration management
-
-### Security Best Practices
-
-- Use environment variables for sensitive data
-- Implement proper CORS policies
-- Validate all input data
-- Use HTTPS in production
-- Regular dependency updates
-
-## 🤝 Contributing
-
-### Development Workflow
-
-1. **Fork the repository**
-2. **Create a feature branch**
-3. **Make your changes**
-4. **Add tests for new functionality**
-5. **Ensure all tests pass**
-6. **Submit a pull request**
-
-### Code Standards
-
-- **Java**: Follow Spring Boot conventions
-- **TypeScript**: Use strict mode and ESLint
-- **Testing**: Maintain >80% coverage
-- **Documentation**: Update README for new features
 
 ## 📄 License
 
