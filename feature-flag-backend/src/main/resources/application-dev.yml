@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/feature_flags?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: appuser
+    password: apppassword
+    
+  redis:
+    host: localhost
+    port: 6379
+
+logging:
+  level:
+    com.featureflags: DEBUG
+    org.springframework.web: DEBUG
+    org.mybatis: DEBUG

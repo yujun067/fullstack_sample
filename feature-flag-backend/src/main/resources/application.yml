@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: feature-flag-backend
+  
+  profiles:
+    active: dev
+  
+  datasource:
+    url: jdbc:mysql://localhost:3306/feature_flags?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: appuser
+    password: apppassword
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.featureflags.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    default-fetch-size: 100
+    default-statement-timeout: 30
+
+
+server:
+  port: 8080
+  servlet:
+    context-path: /feature
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+
+logging:
+  level:
+    com.featureflags: DEBUG
+    org.springframework.web: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

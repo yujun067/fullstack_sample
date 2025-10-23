@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.featureflags.repository.FeatureFlagMapper">
+
+    <!-- Result Map for FeatureFlag -->
+    <resultMap id="FeatureFlagResultMap" type="com.featureflags.entity.FeatureFlag">
+        <id property="id" column="id" />
+        <result property="name" column="name" />
+        <result property="description" column="description" />
+        <result property="enabled" column="enabled" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+        <result property="createdBy" column="created_by" />
+        <result property="updatedBy" column="updated_by" />
+    </resultMap>
+
+    <!-- Find all feature flags with pagination -->
+    <select id="findAll" resultMap="FeatureFlagResultMap"> SELECT * FROM feature_flags ORDER BY
+        created_at DESC LIMIT #{offset}, #{limit} </select>
+
+    <!-- Find feature flag by ID -->
+    <select id="findById" resultMap="FeatureFlagResultMap"> SELECT * FROM feature_flags WHERE id =
+        #{id} </select>
+
+    <!-- Find feature flag by name -->
+    <select id="findByName" resultMap="FeatureFlagResultMap"> SELECT * FROM feature_flags WHERE name
+        = #{name} </select>
+
+    <!-- Count total number of feature flags -->
+    <select id="countAll" resultType="long"> SELECT COUNT(*) FROM feature_flags </select>
+
+    <!-- Insert a new feature flag -->
+    <insert id="insert" parameterType="com.featureflags.entity.FeatureFlag" useGeneratedKeys="true"
+        keyProperty="id"> INSERT INTO feature_flags (name, description, enabled, created_by,
+        updated_by) VALUES (#{name}, #{description}, #{enabled}, #{createdBy}, #{updatedBy}) </insert>
+
+    <!-- Update an existing feature flag -->
+    <update id="update" parameterType="com.featureflags.entity.FeatureFlag"> UPDATE feature_flags
+        SET description = #{description}, enabled = #{enabled}, updated_at = CURRENT_TIMESTAMP,
+        updated_by = #{updatedBy} WHERE id = #{id} </update>
+
+    <!-- Delete a feature flag by ID -->
+    <delete id="deleteById"> DELETE FROM feature_flags WHERE id = #{id} </delete>
+
+    <!-- Check if a feature flag exists by name -->
+    <select id="existsByName" resultType="boolean"> SELECT COUNT(*) > 0 FROM feature_flags WHERE
+        name = #{name} </select>
+
+    <!-- Find feature flags by names (batch query) -->
+    <select id="findByNames" resultMap="FeatureFlagResultMap"> SELECT * FROM feature_flags WHERE
+        name IN <foreach item="name" collection="names" open="(" separator="," close=")"> #{name} </foreach>
+    </select>
+
+
+</mapper>

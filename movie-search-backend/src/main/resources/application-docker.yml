@@ -1,0 +1,24 @@
+spring:
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:redis}
+      port: ${SPRING_REDIS_PORT:6379}
+
+omdb:
+  api:
+    url: ${OMDB_API_URL:http://www.omdbapi.com}
+    key: ${OMDB_API_KEY}
+    timeout: 5000
+
+feature-flag:
+  service:
+    url: ${FEATURE_FLAG_SERVICE_URL:http://feature-flag-backend:8080/feature}
+  subscribed:
+    maintenance_mode: false
+    dark_mode: false
+  refresh-interval: 300000
+
+logging:
+  level:
+    com.moviesearch: INFO
+    org.springframework.web: INFO

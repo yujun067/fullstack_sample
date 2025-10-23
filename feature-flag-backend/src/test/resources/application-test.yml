@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: feature-flags-test
+  
+  # Test database configuration - Handled by TestContainersConfig 
+  
+  # JPA/Hibernate configuration for tests
+  jpa:
+    hibernate:
+      ddl-auto: none  # Disable Hibernate DDL, use schema.sql
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.MySQL8Dialect
+  
+  # MyBatis configuration - Keep consistent with main application
+  mybatis:
+    mapper-locations: classpath:mapper/*.xml
+    type-aliases-package: com.featureflags.entity
+    configuration:
+      map-underscore-to-camel-case: true
+      default-fetch-size: 100
+      default-statement-timeout: 30
+  
+  
+  # Redis configuration for tests - Mocked in tests
+
+# Server configuration
+server:
+  port: 0  # Random port for tests
+  servlet:
+    context-path: /feature  # Keep consistent with main application
+
+# Logging configuration for tests
+logging:
+  level:
+    com.featureflags: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.test: DEBUG
+    org.mybatis: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"  # Keep consistent with main application
+

@@ -1,0 +1,74 @@
+spring:
+  application:
+    name: movie-search-test
+  
+  # Redis configuration for tests - Mocked in tests
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+  
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000 # 1 hour in milliseconds (default)
+    cache-names:
+      movieSearch:
+        time-to-live: 1800000  # 30 minutes
+      movieDetails:
+        time-to-live: 86400000 # 24 hours
+
+# Server configuration
+server:
+  port: 0  # Random port for tests
+  servlet:
+    context-path: /movie
+
+# Management endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# OpenAPI/Swagger configuration
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+
+# Logging configuration for tests
+logging:
+  level:
+    com.moviesearch: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.test: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# OMDB API Configuration for tests
+omdb:
+  api:
+    url: http://www.omdbapi.com
+    key: ${OMDB_API_KEY:64171ee0}
+    timeout: 5000
+
+# Feature Flag Service Configuration for tests
+feature-flag:
+  service:
+    url: http://localhost:8080/feature
+  subscribed:
+    maintenance_mode: false
+    dark_mode: false
+  refresh-interval: 300000 # 5 minutes

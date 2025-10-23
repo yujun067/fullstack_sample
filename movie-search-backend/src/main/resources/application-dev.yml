@@ -1,0 +1,15 @@
+spring:
+  redis:
+    host: localhost
+    port: 6379
+
+omdb:
+  api:
+    url: http://www.omdbapi.com
+    key: ${OMDB_API_KEY:64171ee0}
+    timeout: 5000
+
+logging:
+  level:
+    com.moviesearch: DEBUG
+    org.springframework.web: DEBUG

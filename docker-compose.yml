@@ -1,0 +1,150 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: feature-flags-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/migrations:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      timeout: 20s
+      retries: 10
+
+  # Redis Cache & Pub/Sub
+  redis:
+    image: redis:7-alpine
+    container_name: feature-flags-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 10s
+      retries: 5
+    command: redis-server --appendonly yes
+
+  # Feature Flag Backend
+  feature-flag-backend:
+    build:
+      context: ./feature-flag-backend
+      dockerfile: Dockerfile
+    container_name: feature-flag-backend
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/feature/actuator/health"]
+      timeout: 30s
+      retries: 5
+      start_period: 60s
+
+  # Movie Search Backend
+  movie-search-backend:
+    build:
+      context: ./movie-search-backend
+      dockerfile: Dockerfile
+    container_name: movie-search-backend
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - OMDB_API_KEY=${OMDB_API_KEY}
+      - OMDB_API_URL=${OMDB_API_URL}
+      - FEATURE_FLAG_SERVICE_URL=http://feature-flag-backend:8080/feature
+    ports:
+      - "8081:8081"
+    networks:
+      - app-network
+    depends_on:
+      feature-flag-backend:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/movie/actuator/health"]
+      timeout: 30s
+      retries: 5
+      start_period: 60s
+
+  # Feature Flag Frontend
+  feature-flag-frontend:
+    build:
+      context: ./feature-flag-frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=http://localhost:8080
+    container_name: feature-flag-frontend
+    ports:
+      - "3000:80"
+    networks:
+      - app-network
+    depends_on:
+      feature-flag-backend:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      timeout: 10s
+      retries: 3
+
+  # Movie Search Frontend
+  movie-search-frontend:
+    build:
+      context: ./movie-search-frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=http://localhost:8081
+    container_name: movie-search-frontend
+    ports:
+      - "3001:80"
+    networks:
+      - app-network
+    depends_on:
+      movie-search-backend:
+        condition: service_healthy
+      feature-flag-backend:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      timeout: 10s
+      retries: 3
+
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge
