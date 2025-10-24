@@ -149,6 +149,28 @@ During testing, we discovered that OMDb API returns duplicate data (e.g., search
 - **Feature Flag API**: <http://localhost:8080/feature/swagger-ui.html>
 - **Movie Search API**: <http://localhost:8081/movie/swagger-ui.html>
 
+### **REST API Endpoints**
+
+#### Feature Flag Backend (Port 8080)
+
+| Method | Endpoint | Description | Request Body | Response |
+|--------|----------|-------------|--------------|----------|
+| GET | `/feature/flags` | Get all feature flags | - | List of feature flags |
+| GET | `/feature/flags/{name}` | Get specific feature flag | - | Feature flag details |
+| POST | `/feature/flags` | Create new feature flag | `{"name": "string", "enabled": boolean, "description": "string"}` | Created feature flag |
+| PUT | `/feature/flags/{name}` | Update feature flag | `{"enabled": boolean, "description": "string"}` | Updated feature flag |
+| DELETE | `/feature/flags/{name}` | Delete feature flag | - | Success message |
+| GET | `/feature/actuator/health` | Health check | - | Service health status |
+
+#### Movie Search Backend (Port 8081)
+
+| Method | Endpoint | Description | Request Body | Response |
+|--------|----------|-------------|--------------|----------|
+| GET | `/movie/movies/search` | Search movies | `?search={query}&page={page}` | Movie search results |
+| GET | `/movie/movies/{imdbId}` | Get movie details | - | Movie details |
+| GET | `/movie/movies/flags/{flagName}` | Get feature flag status | - | Feature flag status |
+| GET | `/movie/actuator/health` | Health check | - | Service health status |
+
 ### **Live Demo Scenarios**
 
 1. **Real-time Dark Mode Toggle**
@@ -333,7 +355,7 @@ sudo kill -9 <PID>
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
 
 
