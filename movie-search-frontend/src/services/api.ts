@@ -1,7 +1,7 @@
 import axios, { type AxiosInstance, type AxiosResponse } from 'axios';
 import type { MovieSearchRequest, MovieSearchResponse, Movie, ApiError, ValidationError } from '../types/movie';
 import { store } from '../store';
-import { setError } from '../store/slices/errorSlice';
+import { setError, clearError } from '../store/slices/errorSlice';
 import { enableMaintenanceMode } from '../store/slices/maintenanceSlice';
 
 class ApiService {
@@ -42,10 +42,18 @@ class ApiService {
           // Server responded with error status
           const errorData = error.response.data;
           
-          // Check for maintenance mode (503 status with MAINTENANCE_MODE error)
-          if (error.response.status === 503 && errorData?.error === 'MAINTENANCE_MODE') {
+          // Check for maintenance mode (503 status with error code 2007 or maintenance message)
+          const isMaintenanceMode = error.response.status === 503 && (
+            errorData?.code === 2007 || 
+            errorData?.error === 'MAINTENANCE_MODE' ||
+            (typeof errorData?.error === 'string' && errorData.error.toLowerCase().includes('maintenance'))
+          );
+          
+          if (isMaintenanceMode) {
             console.log('Maintenance mode detected, enabling maintenance mode');
             store.dispatch(enableMaintenanceMode());
+            // Clear any existing error to avoid showing error notification
+            store.dispatch(clearError());
             // Don't dispatch error for maintenance mode, just enable it
             throw error;
           }

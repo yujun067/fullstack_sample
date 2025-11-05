@@ -35,7 +35,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   useEffect(() => {
     // Apply theme based on feature flag
     console.log('🎨 [THEME] Feature flag dark_mode enabled:', isDarkModeEnabled);
-    console.log('🎨 [THEME] Current flags:', flags);
     
     if (isDarkModeEnabled) {
       console.log('🎨 [THEME] Setting theme to dark');
@@ -46,7 +45,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       setTheme('light');
       document.documentElement.classList.remove('dark');
     }
-  }, [isDarkModeEnabled, flags]);
+  }, [isDarkModeEnabled]);
 
   const value: ThemeContextType = {
     theme,

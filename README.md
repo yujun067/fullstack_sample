@@ -225,8 +225,8 @@ curl "http://localhost:8081/movie/movies/search?search=batman"
 - **Docker** - Containerization
 
 ### Frontend
-- **React 18** - UI framework
-- **TypeScript** - Type safety
+- **React 19.1.1** - UI framework
+- **TypeScript 5.9.3** - Type safety
 - **Redux Toolkit** - State management
 - **Tailwind CSS** - Styling with dark mode support
 - **Vite** - Build tool
