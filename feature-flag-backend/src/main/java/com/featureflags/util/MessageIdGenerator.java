@@ -10,7 +10,7 @@ public class MessageIdGenerator {
 
     /**
      * Generate a unique message ID using UUID.
-     * Format: "flag-{timestamp}-{uuid}"
+     * Format: "flag-{flagName}-{timestamp}-{uuid}"
      * Example: "flag-1703123456789-550e8400-e29b-41d4-a716-446655440000"
      */
     public static String generateMessageId(String flagName) {

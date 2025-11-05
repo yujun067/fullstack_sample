@@ -69,7 +69,7 @@ public class FeatureFlagService {
     /**
      * Create a new feature flag.
      */
-    @CacheEvict(value = "featureFlags", allEntries = true)
+    @CacheEvict(value = "featureFlags", key = "#request.name")
     public FlagResponse createFlag(CreateFlagRequest request) {
         log.debug("Creating new flag: {}", request);
 
@@ -101,7 +101,7 @@ public class FeatureFlagService {
     /**
      * Update an existing feature flag.
      */
-    @CacheEvict(value = "featureFlags", allEntries = true)
+    @CacheEvict(value = "featureFlags", key = "#name")
     public FlagResponse updateFlag(String name, UpdateFlagRequest request) {
         log.debug("Updating flag name: {} with request: {}", name, request);
 
@@ -135,7 +135,7 @@ public class FeatureFlagService {
     /**
      * Delete a feature flag.
      */
-    @CacheEvict(value = "featureFlags", allEntries = true)
+    @CacheEvict(value = "featureFlags", key = "#name")
     public void deleteFlag(String name) {
         log.debug("Deleting flag name: {}", name);
 

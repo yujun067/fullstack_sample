@@ -1,16 +1,14 @@
 package com.featureflags.integration;
 
-import com.featureflags.config.TestContainersConfig;
+import com.featureflags.config.BaseIntegrationTest;
 import com.featureflags.dto.CreateFlagRequest;
 import com.featureflags.entity.FeatureFlag;
 import com.featureflags.repository.FeatureFlagMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,9 +19,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ActiveProfiles("test")
-@Import(TestContainersConfig.class)
 @Transactional
-class FeatureFlagIntegrationTest {
+class FeatureFlagIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private FeatureFlagMapper featureFlagMapper;

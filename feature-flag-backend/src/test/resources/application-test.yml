@@ -2,7 +2,7 @@ spring:
   application:
     name: feature-flags-test
   
-  # Test database configuration - Handled by TestContainersConfig 
+  # Test database configuration - Handled by BaseIntegrationTest (Testcontainers) 
   
   # JPA/Hibernate configuration for tests
   jpa:

@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -53,78 +52,18 @@ public class FeatureFlagConsumer {
      * Check if maintenance mode is enabled with fallback mechanism
      */
     public boolean isMaintenanceModeEnabled() {
-        try {
-            FeatureFlagState state = flagStates.get("maintenance_mode");
-            return state != null ? state.isEnabled() : getDefaultValue("maintenance_mode");
-        } catch (Exception e) {
-            log.warn("⚠️ [FALLBACK] Feature flag check failed for maintenance_mode, using default: {}", e.getMessage());
-            return getDefaultValue("maintenance_mode");
-        }
+        Boolean enabled = getFeatureFlag("maintenance_mode");
+        return enabled != null ? enabled : getDefaultValue("maintenance_mode");
     }
 
     /**
-     * Check if dark mode is enabled with fallback mechanism
+     * Get a specific feature flag value directly without creating a copy of all
+     * flags
+     * Returns null if the flag doesn't exist
      */
-    public boolean isDarkModeEnabled() {
-        try {
-            FeatureFlagState state = flagStates.get("dark_mode");
-            return state != null ? state.isEnabled() : getDefaultValue("dark_mode");
-        } catch (Exception e) {
-            log.warn("⚠️ [FALLBACK] Feature flag check failed for dark_mode, using default: {}", e.getMessage());
-            return getDefaultValue("dark_mode");
-        }
-    }
-
-    /**
-     * Get all feature flags with fallback mechanism
-     * Returns a defensive copy to prevent external modification
-     */
-    public Map<String, Boolean> getAllFeatureFlags() {
-        try {
-            Map<String, Boolean> result = new ConcurrentHashMap<>();
-            flagStates.forEach((name, state) -> result.put(name, state.isEnabled()));
-            return result;
-        } catch (Exception e) {
-            log.warn("⚠️ [FALLBACK] Failed to get all feature flags, returning empty map: {}", e.getMessage());
-            return new ConcurrentHashMap<>();
-        }
-    }
-
-    /**
-     * Check if a specific feature flag is enabled with fallback mechanism
-     */
-    public boolean isFeatureFlagEnabled(String flagName, boolean defaultValue) {
-        try {
-            FeatureFlagState state = flagStates.get(flagName);
-            return state != null ? state.isEnabled() : defaultValue;
-        } catch (Exception e) {
-            log.warn("⚠️ [FALLBACK] Feature flag check failed for '{}', using default value {}: {}",
-                    flagName, defaultValue, e.getMessage());
-            return defaultValue;
-        }
-    }
-
-    /**
-     * Get feature flags with metadata for monitoring and debugging
-     * Returns both flag states and their metadata
-     */
-    public Map<String, FeatureFlagState> getAllFeatureFlagsWithMetadata() {
-        return Map.copyOf(flagStates);
-    }
-
-    /**
-     * Get multiple feature flags by names with metadata
-     * This method provides atomic access to prevent race conditions
-     */
-    public Map<String, FeatureFlagState> getFeatureFlagsWithMetadata(List<String> flagNames) {
-        Map<String, FeatureFlagState> result = new ConcurrentHashMap<>();
-        for (String flagName : flagNames) {
-            FeatureFlagState state = flagStates.get(flagName);
-            if (state != null) {
-                result.put(flagName, state);
-            }
-        }
-        return result;
+    public Boolean getFeatureFlag(String flagName) {
+        FeatureFlagState state = flagStates.get(flagName);
+        return state != null ? state.isEnabled() : null;
     }
 
     /**
@@ -141,18 +80,18 @@ public class FeatureFlagConsumer {
      * consistency
      */
     public void updateFeatureFlag(String flagName, boolean enabled, String messageId) {
-        log.info("🔄 [CONSUMER] Received feature flag update '{}' to {} (messageId: {})",
+        log.info("[CONSUMER] Received feature flag update '{}' to {} (messageId: {})",
                 flagName, enabled, messageId);
 
         // Get current state
         FeatureFlagState currentState = flagStates.get(flagName);
-        log.debug("🔄 [CONSUMER] Current state for '{}': {}", flagName,
+        log.debug("[CONSUMER] Current state for '{}': {}", flagName,
                 currentState != null ? String.format("enabled=%s, messageId=%s, lastUpdated=%s",
                         currentState.isEnabled(), currentState.getMessageId(), currentState.getLastUpdated()) : "null");
 
         // Check for duplicate message processing (if messageId provided)
         if (messageId != null && currentState != null && messageId.equals(currentState.getMessageId())) {
-            log.debug("🔄 [CONSUMER] Ignoring duplicate message for flag '{}' with messageId: {}", flagName, messageId);
+            log.debug("[CONSUMER] Ignoring duplicate message for flag '{}' with messageId: {}", flagName, messageId);
             return;
         }
 
@@ -160,9 +99,9 @@ public class FeatureFlagConsumer {
         FeatureFlagState newState = new FeatureFlagState(enabled, messageId);
         flagStates.put(flagName, newState);
 
-        log.info("✅ [CONSUMER] Successfully updated feature flag '{}' to {} (messageId: {})",
+        log.info("[CONSUMER] Successfully updated feature flag '{}' to {} (messageId: {})",
                 flagName, enabled, messageId);
-        log.debug("✅ [CONSUMER] Current flag states: {}", flagStates.keySet());
+        log.debug("[CONSUMER] Current flag states: {}", flagStates.keySet());
     }
 
     /**

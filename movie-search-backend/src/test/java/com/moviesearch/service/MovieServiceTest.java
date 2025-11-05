@@ -7,6 +7,9 @@ import com.moviesearch.dto.MovieResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -15,6 +18,7 @@ import reactor.test.StepVerifier;
 
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -124,6 +128,64 @@ class MovieServiceTest {
                                 .verify();
 
                 verify(omdbApiClient).getMovieDetails("tt0372784");
+        }
+
+        @Test
+        void testIsFeatureFlagEnabled_Success() {
+                // Given
+                String flagName = "test_flag";
+                when(featureFlagConsumer.getFeatureFlag(flagName))
+                                .thenReturn(true);
+
+                // When
+                boolean result = movieService.isFeatureFlagEnabled(flagName);
+
+                // Then
+                assertTrue(result);
+                verify(featureFlagConsumer).getFeatureFlag(flagName);
+        }
+
+        @Test
+        void testIsFeatureFlagEnabled_Disabled() {
+                // Given
+                String flagName = "test_flag";
+                when(featureFlagConsumer.getFeatureFlag(flagName))
+                                .thenReturn(false);
+
+                // When
+                boolean result = movieService.isFeatureFlagEnabled(flagName);
+
+                // Then
+                assertFalse(result);
+                verify(featureFlagConsumer).getFeatureFlag(flagName);
+        }
+
+        @Test
+        void testIsFeatureFlagEnabled_FlagNotFound() {
+                // Given
+                String flagName = "nonexistent_flag";
+                when(featureFlagConsumer.getFeatureFlag(flagName))
+                                .thenReturn(null);
+
+                // When & Then
+                IllegalArgumentException exception = assertThrows(
+                                IllegalArgumentException.class,
+                                () -> movieService.isFeatureFlagEnabled(flagName));
+
+                assertEquals("Feature flag not found: " + flagName, exception.getMessage());
+                verify(featureFlagConsumer).getFeatureFlag(flagName);
+        }
+
+        @ParameterizedTest
+        @NullAndEmptySource
+        @ValueSource(strings = { "   ", "\t", "\n" })
+        void testIsFeatureFlagEnabled_InvalidFlagName(String flagName) {
+                // When & Then
+                IllegalArgumentException exception = assertThrows(
+                                IllegalArgumentException.class,
+                                () -> movieService.isFeatureFlagEnabled(flagName));
+
+                assertEquals("Feature flag name cannot be null or empty", exception.getMessage());
         }
 
 }

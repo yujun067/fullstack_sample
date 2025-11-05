@@ -2,6 +2,7 @@ package com.featureflags.service;
 
 import com.featureflags.config.UnitTestConfig;
 import com.featureflags.dto.CreateFlagRequest;
+import com.featureflags.dto.FeatureFlagBatchResponse;
 import com.featureflags.dto.FlagListResponse;
 import com.featureflags.dto.FlagResponse;
 import com.featureflags.dto.UpdateFlagRequest;
@@ -19,6 +20,7 @@ import org.springframework.context.annotation.Import;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -197,5 +199,75 @@ class FeatureFlagServiceTest {
 
         verify(featureFlagMapper).findByName("nonexistent_flag");
         verify(featureFlagMapper, never()).deleteById(anyLong());
+    }
+
+    @Test
+    void testGetFeatureFlagsBatch_Success() {
+        // Given
+        List<String> flagNames = Arrays.asList("test_flag", "another_flag");
+        FeatureFlag flag2 = new FeatureFlag();
+        flag2.setId(2L);
+        flag2.setName("another_flag");
+        flag2.setDescription("Another test flag");
+        flag2.setEnabled(false);
+        flag2.setUpdatedAt(LocalDateTime.now());
+
+        List<FeatureFlag> flags = Arrays.asList(testFlag, flag2);
+        when(featureFlagMapper.findByNames(flagNames)).thenReturn(flags);
+
+        // When
+        FeatureFlagBatchResponse response = featureFlagService.getFeatureFlagsBatch(flagNames);
+
+        // Then
+        assertNotNull(response);
+        assertNotNull(response.getFlags());
+        assertEquals(2, response.getFlags().size());
+        assertTrue(response.getFlags().containsKey("test_flag"));
+        assertTrue(response.getFlags().containsKey("another_flag"));
+        assertNotNull(response.getResponseTimestamp());
+        verify(featureFlagMapper).findByNames(flagNames);
+    }
+
+    @Test
+    void testGetFeatureFlagsBatch_EmptyList() {
+        // Given
+        List<String> emptyList = Collections.emptyList();
+
+        // When
+        FeatureFlagBatchResponse response = featureFlagService.getFeatureFlagsBatch(emptyList);
+
+        // Then
+        assertNotNull(response);
+        assertNotNull(response.getFlags());
+        assertTrue(response.getFlags().isEmpty());
+        assertNotNull(response.getResponseTimestamp());
+        verify(featureFlagMapper, never()).findByNames(any());
+    }
+
+    @Test
+    void testGetFeatureFlagsBatch_NullList() {
+        // When
+        FeatureFlagBatchResponse response = featureFlagService.getFeatureFlagsBatch(null);
+
+        // Then
+        assertNotNull(response);
+        assertNotNull(response.getFlags());
+        assertTrue(response.getFlags().isEmpty());
+        assertNotNull(response.getResponseTimestamp());
+        verify(featureFlagMapper, never()).findByNames(any());
+    }
+
+    @Test
+    void testGetFeatureFlagsBatch_Exception() {
+        // Given
+        List<String> flagNames = Arrays.asList("test_flag");
+        when(featureFlagMapper.findByNames(flagNames)).thenThrow(new RuntimeException("Database error"));
+
+        // When & Then
+        assertThrows(RuntimeException.class, () -> {
+            featureFlagService.getFeatureFlagsBatch(flagNames);
+        });
+
+        verify(featureFlagMapper).findByNames(flagNames);
     }
 }

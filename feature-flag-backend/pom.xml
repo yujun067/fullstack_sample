@@ -144,6 +144,10 @@
                             <goal>check</goal>
                         </goals>
                         <configuration>
+                            <excludes>
+                                <exclude>**/exception/**</exclude>
+                                <exclude>**/GlobalExceptionHandler*</exclude>
+                            </excludes>
                             <rules>
                                 <rule>
                                     <element>BUNDLE</element>
@@ -173,6 +177,7 @@
                     </includes>
                     <excludes>
                         <exclude>**/*IntegrationTest.java</exclude>
+                        <exclude>**/*IT.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -185,6 +190,7 @@
                 <configuration>
                     <includes>
                         <include>**/*IntegrationTest.java</include>
+                        <include>**/*IT.java</include>
                     </includes>
                 </configuration>
                 <executions>

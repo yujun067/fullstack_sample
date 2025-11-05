@@ -72,12 +72,12 @@ public class MovieService {
             throw new IllegalArgumentException("Feature flag name cannot be null or empty");
         }
 
-        // Check if the feature flag exists
-        if (!featureFlagConsumer.getAllFeatureFlags().containsKey(flagName)) {
+        Boolean enabled = featureFlagConsumer.getFeatureFlag(flagName);
+        if (enabled == null) {
             throw new IllegalArgumentException("Feature flag not found: " + flagName);
         }
 
-        return featureFlagConsumer.getAllFeatureFlags().get(flagName);
+        return enabled;
     }
 
 }

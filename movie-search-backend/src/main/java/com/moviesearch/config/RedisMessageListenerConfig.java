@@ -28,8 +28,12 @@ public class RedisMessageListenerConfig {
 
     @Bean
     public MessageListenerAdapter featureFlagMessageListener() {
-        return new MessageListenerAdapter(new FeatureFlagMessageListener(featureFlagConsumer, objectMapper),
+        MessageListenerAdapter adapter = new MessageListenerAdapter(
+                new FeatureFlagMessageListener(featureFlagConsumer, objectMapper),
                 "handleMessage");
+        // Use StringRedisSerializer to receive string messages from Redis pub/sub
+        adapter.setSerializer(new org.springframework.data.redis.serializer.StringRedisSerializer());
+        return adapter;
     }
 
     @Bean

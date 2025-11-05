@@ -49,6 +49,8 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_REDIS_HOST=redis
       - SPRING_REDIS_PORT=6379
+      - SPRING_DATASOURCE_USERNAME=${MYSQL_USER}
+      - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}
     ports:
       - "8080:8080"
     networks:
@@ -100,7 +102,7 @@ services:
       context: ./feature-flag-frontend
       dockerfile: Dockerfile
       args:
-        - VITE_API_BASE_URL=http://localhost:8080
+        - VITE_API_BASE_URL=http://localhost:8080/feature
     container_name: feature-flag-frontend
     ports:
       - "3000:80"

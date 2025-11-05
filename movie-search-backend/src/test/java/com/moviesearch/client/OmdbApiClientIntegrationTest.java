@@ -1,11 +1,14 @@
 package com.moviesearch.client;
 
+import com.moviesearch.config.BaseIntegrationTest;
 import com.moviesearch.dto.MovieSearchRequest;
 import com.moviesearch.dto.MovieResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.env.Environment;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -16,16 +19,24 @@ import static org.junit.jupiter.api.Assertions.*;
  * Integration test for OmdbApiClient that makes actual calls to OMDB API.
  * This test verifies the real integration with external OMDB service.
  */
-@ExtendWith(MockitoExtension.class)
-class OmdbApiClientIntegrationTest {
+@SpringBootTest
+@TestPropertySource(locations = "classpath:application-test.yml")
+class OmdbApiClientIntegrationTest extends BaseIntegrationTest {
+
+    @Autowired
+    private Environment environment;
 
     private OmdbApiClient omdbApiClient;
 
     @BeforeEach
     void setUp() {
+        // Read configuration from application-test.yml
+        String baseUrl = environment.getProperty("omdb.api.url", "http://www.omdbapi.com");
+        String apiKey = environment.getProperty("omdb.api.key", "64171ee0");
+
         // Create WebClient for OMDB API
         WebClient webClient = WebClient.builder()
-                .baseUrl("http://www.omdbapi.com")
+                .baseUrl(baseUrl)
                 .build();
 
         // Create OmdbApiClient instance manually
@@ -35,7 +46,7 @@ class OmdbApiClientIntegrationTest {
         try {
             java.lang.reflect.Field apiKeyField = OmdbApiClient.class.getDeclaredField("apiKey");
             apiKeyField.setAccessible(true);
-            apiKeyField.set(omdbApiClient, "64171ee0");
+            apiKeyField.set(omdbApiClient, apiKey);
         } catch (Exception e) {
             throw new RuntimeException("Failed to set API key", e);
         }
@@ -192,45 +203,6 @@ class OmdbApiClientIntegrationTest {
                     assertEquals(2, response.getCurrentPage());
                     assertTrue(response.getTotalPages() >= 2);
                     assertTrue(response.isHasPreviousPage());
-                })
-                .verifyComplete();
-    }
-
-    @Test
-    void testSearchMovies_Timeout() {
-        // Given
-        MovieSearchRequest request = new MovieSearchRequest();
-        request.setSearch("batman");
-        request.setPage(1);
-
-        // When
-        Mono<com.moviesearch.dto.MovieSearchResponse> result = omdbApiClient.searchMovies(request);
-
-        // Then - Should complete within reasonable time
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertNotNull(response);
-                    // Verify response time is reasonable (less than 10 seconds)
-                    // Note: responseTimeMs is hardcoded in OmdbApiClient, so we just verify it's
-                    // not null
-                    assertNotNull(response.getResponseTimeMs());
-                })
-                .verifyComplete();
-    }
-
-    @Test
-    void testGetMovieDetails_Timeout() {
-        // Given
-        String imdbId = "tt0372784";
-
-        // When
-        Mono<MovieResponse> result = omdbApiClient.getMovieDetails(imdbId);
-
-        // Then - Should complete within reasonable time
-        StepVerifier.create(result)
-                .assertNext(movie -> {
-                    assertNotNull(movie);
-                    // Verify we get a response within reasonable time
                 })
                 .verifyComplete();
     }

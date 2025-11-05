@@ -13,18 +13,18 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SwaggerConfig {
 
-    @Bean
-    public OpenAPI customOpenAPI() {
-        return new OpenAPI()
-                .info(new Info()
-                        .title("Feature Flag Management API")
-                        .version("1.0.0")
-                        .description("API for managing feature flags with CRUD operations and real-time updates")
-                        .contact(new Contact()
-                                .name("Feature Flag Team")
-                                .email("support@featureflags.com"))
-                        .license(new License()
-                                .name("MIT License")
-                                .url("https://opensource.org/licenses/MIT")));
-    }
+        @Bean
+        public OpenAPI customOpenAPI() {
+                return new OpenAPI()
+                                .info(new Info()
+                                                .title("Feature Flag Management API")
+                                                .version("1.0.0")
+                                                .description("API for managing feature flags with CRUD operations and real-time updates")
+                                                .contact(new Contact()
+                                                                .name("Feature Flag Team")
+                                                                .email("support@featureflags.com"))
+                                                .license(new License()
+                                                                .name("MIT License")
+                                                                .url("https://opensource.org/licenses/MIT")));
+        }
 }
